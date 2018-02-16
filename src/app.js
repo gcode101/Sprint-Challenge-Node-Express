@@ -12,35 +12,31 @@ app.get('/compare', (req, res) => {
 	let yesterdayRate;
 	let diff;
 	fetch('https://api.coindesk.com/v1/bpi/currentprice.json')
-	.then(price => price.json())
-	.then(price => {
-		// console.log(price);
-		todayRate = price.bpi.USD.rate;
-		let arr = todayRate.split('');
-		arr = arr.filter(num => num != ',');
-		todayRate = arr.join('');
-		todayRate = Number(todayRate);
-		console.log('currentPrice -> ', todayRate);
-		// res.send(todayRate);
-	})
-	.catch(err => {
-		console.log('There was an error: ', err);
-		res.send({ error: err });
-	});
-	fetch('https://api.coindesk.com/v1/bpi/historical/close.json?for=yesterday')
-	.then(price => price.json())
-	.then(price => {
-		// console.log('yesterday info ->', price);
-		yesterdayRate = Object.values(price.bpi);
-		yesterdayRate = yesterdayRate[0];
-		console.log('yesterdayPrice -> ', yesterdayRate);
-		diff = currentPrice - yesterdayRate;
-		res.send({ title: 'Bitcoin value difference since yesterday', value: diff });
-	})
-	.catch(err => {
-		console.log('There was an error: ', err);
-		res.send({ error: err });
-	});
+		.then(price => price.json())
+		.then(price => {
+			// console.log(price);
+			todayRate = price.bpi.USD.rate;
+			let arr = todayRate.split('');
+			arr = arr.filter(num => num != ',');
+			todayRate = arr.join('');
+			todayRate = Number(todayRate);
+			console.log('currentPrice -> ', todayRate);
+			// res.send(todayRate);
+		})
+		.then(() => fetch('https://api.coindesk.com/v1/bpi/historical/close.json?for=yesterday')
+			.then(price => price.json())
+			.then(price => {
+				// console.log('yesterday info ->', price);
+				yesterdayRate = Object.values(price.bpi);
+				yesterdayRate = yesterdayRate[0];
+				console.log('yesterdayPrice -> ', yesterdayRate);
+				diff = todayRate - yesterdayRate;
+				res.send({ title: 'Bitcoin value difference since yesterday', value: diff });
+		}))
+		.catch(err => {
+			console.log('There was an error: ', err);
+			res.send({ error: err });
+		});
 });
 
 app.listen(PORT, err => {
